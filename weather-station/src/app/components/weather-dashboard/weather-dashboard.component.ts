@@ -8,6 +8,8 @@ import { Icon, Style } from 'ol/style.js';
 import { Vector as VectorSource } from 'ol/source.js';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
 import { fromLonLat, transformExtent } from 'ol/proj.js';
+import { AppService } from '../../app.service';
+import { Station } from '../../interfaces/station';
 
 @Component({
   selector: 'app-weather-dashboard',
@@ -18,72 +20,53 @@ import { fromLonLat, transformExtent } from 'ol/proj.js';
 })
 export class WeatherDashboardComponent implements OnInit {
   map: Map;
-  point1: Feature;
-  point2: Feature;
-  point3: Feature;
-  point4: Feature;
   iconStyle: Style;
+  stations: Station[] = [];
+  points: Feature[] = [];
+
+  constructor(private service: AppService) {}
 
   ngOnInit() {
-    this.initializeMap();
+    this.service.getStations().subscribe((data) => {
+      this.stations = data.stations;
+      this.initializeMap();
+      this.map.on('pointermove', (evt) => {
+        this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
+          evt.pixel
+        )
+          ? 'pointer'
+          : '';
+      });
 
-    this.map.on('pointermove', (evt) => {
-      this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
-        evt.pixel
-      )
-        ? 'pointer'
-        : '';
-    });
-
-    this.map.on('click', (evt) => {
-      if (this.map.hasFeatureAtPixel(evt.pixel)) {
-        const name = this.map
-          .getFeaturesAtPixel(evt.pixel)[0]
-          .getProperties().name;
-        if (name == 'Zagreb Grič') {
-          window.open(
-            'https://www.yr.no/en/forecast/hourly-table/2-3186886/Croatia/City%20of%20Zagreb/Zagreb?i=0',
-            '_blank'
-          );
-        } else if (name == 'Split Marjan') {
-          window.open(
-            'https://www.yr.no/en/forecast/hourly-table/2-3190261/Croatia/Split-Dalmatia/Town%20of%20Split/Split?i=0',
-            '_blank'
-          );
-        } else if (name == 'Rijeka Kozala') {
-          window.open(
-            'https://www.yr.no/en/forecast/hourly-table/2-3191648/Croatia/Primorje-Gorski%20Kotar%20County/Town%20of%20Rijeka/Rijeka?i=0',
-            '_blank'
-          );
-        } else if (name == 'Osijek Čepin') {
-          window.open(
-            'https://www.yr.no/en/forecast/hourly-table/2-3193935/Croatia/County%20of%20Osijek-Baranja/Osijek/Osijek?i=0',
-            '_blank'
-          );
+      this.map.on('click', (evt) => {
+        if (this.map.hasFeatureAtPixel(evt.pixel)) {
+          const name = this.map
+            .getFeaturesAtPixel(evt.pixel)[0]
+            .getProperties().name;
+          const station = this.stations.find((s) => s.name == name);
+          console.log(station);
+          if (station != null) {
+            window.open(station.link, '_blank');
+          }
         }
-      }
+      });
     });
   }
 
   initializeMap() {
-    this.point1 = new Feature({
-      geometry: new Point(fromLonLat([15.9722, 45.8146])),
-      name: 'Zagreb Grič',
-    });
-
-    this.point2 = new Feature({
-      geometry: new Point(fromLonLat([16.4256, 43.5084])),
-      name: 'Split Marjan',
-    });
-
-    this.point3 = new Feature({
-      geometry: new Point(fromLonLat([14.4428, 45.3371])),
-      name: 'Rijeka Kozala',
-    });
-    this.point4 = new Feature({
-      geometry: new Point(fromLonLat([18.5614, 45.5024])),
-      name: 'Osijek Čepin',
-    });
+    for (var station of this.stations) {
+      this.points.push(
+        new Feature({
+          geometry: new Point(
+            fromLonLat([
+              station.coordinates.longitude,
+              station.coordinates.latitude,
+            ])
+          ),
+          name: station.name,
+        })
+      );
+    }
 
     this.iconStyle = new Style({
       image: new Icon({
@@ -93,13 +76,12 @@ export class WeatherDashboardComponent implements OnInit {
       }),
     });
 
-    this.point1.setStyle(this.iconStyle);
-    this.point2.setStyle(this.iconStyle);
-    this.point3.setStyle(this.iconStyle);
-    this.point4.setStyle(this.iconStyle);
+    for (var point of this.points) {
+      point.setStyle(this.iconStyle);
+    }
 
     const vectorSource = new VectorSource({
-      features: [this.point1, this.point2, this.point3, this.point4],
+      features: this.points,
     });
 
     const vectorLayer = new VectorLayer({

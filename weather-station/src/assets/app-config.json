@@ -1,0 +1,40 @@
+{
+  "stations": [
+    {
+      "name": "Zagreb Grič",
+      "coordinates": {
+        "latitude": 45.8146,
+        "longitude": 15.9722,
+        "altitude": 157
+      },
+      "link": "https://www.yr.no/en/forecast/hourly-table/2-3186886/Croatia/City%20of%20Zagreb/Zagreb?i=0"
+    },
+    {
+      "name": "Split Marjan",
+      "coordinates": {
+        "latitude": 43.5084,
+        "longitude": 16.4256,
+        "altitude": 122
+      },
+      "link": "https://www.yr.no/en/forecast/hourly-table/2-3190261/Croatia/SplitDalmatia/Town%20of%20Split/Split?i=0"
+    },
+    {
+      "name": "Rijeka Kozala",
+      "coordinates": {
+        "latitude": 45.3371,
+        "longitude": 14.4428,
+        "altitude": 120
+      },
+      "link": "https://www.yr.no/en/forecast/hourly-table/2-3191648/Croatia/PrimorjeGorski%20Kotar%20County/Town%20of%20Rijeka/Rijeka?i=0"
+    },
+    {
+      "name": "Osijek Čepin",
+      "coordinates": {
+        "latitude": 45.5024,
+        "longitude": 18.5614,
+        "altitude": 89
+      },
+      "link": "https://www.yr.no/en/forecast/hourly-table/2-3193935/Croatia/County%20of%20Osijek-Baranja/Osijek/Osijek?i=0"
+    }
+  ]
+}
