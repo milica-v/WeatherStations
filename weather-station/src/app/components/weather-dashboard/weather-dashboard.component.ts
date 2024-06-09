@@ -26,6 +26,43 @@ export class WeatherDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.initializeMap();
+
+    this.map.on('pointermove', (evt) => {
+      this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
+        evt.pixel
+      )
+        ? 'pointer'
+        : '';
+    });
+
+    this.map.on('click', (evt) => {
+      if (this.map.hasFeatureAtPixel(evt.pixel)) {
+        const name = this.map
+          .getFeaturesAtPixel(evt.pixel)[0]
+          .getProperties().name;
+        if (name == 'Zagreb Grič') {
+          window.open(
+            'https://www.yr.no/en/forecast/hourly-table/2-3186886/Croatia/City%20of%20Zagreb/Zagreb?i=0',
+            '_blank'
+          );
+        } else if (name == 'Split Marjan') {
+          window.open(
+            'https://www.yr.no/en/forecast/hourly-table/2-3190261/Croatia/Split-Dalmatia/Town%20of%20Split/Split?i=0',
+            '_blank'
+          );
+        } else if (name == 'Rijeka Kozala') {
+          window.open(
+            'https://www.yr.no/en/forecast/hourly-table/2-3191648/Croatia/Primorje-Gorski%20Kotar%20County/Town%20of%20Rijeka/Rijeka?i=0',
+            '_blank'
+          );
+        } else if (name == 'Osijek Čepin') {
+          window.open(
+            'https://www.yr.no/en/forecast/hourly-table/2-3193935/Croatia/County%20of%20Osijek-Baranja/Osijek/Osijek?i=0',
+            '_blank'
+          );
+        }
+      }
+    });
   }
 
   initializeMap() {
