@@ -24,6 +24,7 @@ export class WeatherDashboardComponent implements OnInit {
   iconStyle: Style;
   stations: Station[] = [];
   points: Feature[] = [];
+  weatherData: any;
 
   constructor(private service: AppService) {}
 
@@ -47,7 +48,11 @@ export class WeatherDashboardComponent implements OnInit {
           const station = this.stations.find((s) => s.name == name);
           console.log(station);
           if (station != null) {
-            window.open(station.link, '_blank');
+            // window.open(station.link, '_blank');
+            this.service.getWeather(station.coordinates.latitude, station.coordinates.longitude).subscribe((data) => {
+              this.weatherData = data;
+              console.log(data);
+            });
           }
         }
       });
