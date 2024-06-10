@@ -19,7 +19,8 @@ export class WeatherStationGraphComponent implements OnInit {
     this.chartOptions = {
       chart: {
         type: 'spline',
-        width: 1900,
+        width: 1800,
+        overflow: 'hidden',
       },
       title: {
         text: this.chartData[0],
