@@ -10,6 +10,7 @@ import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
 import { fromLonLat, transformExtent } from 'ol/proj.js';
 import { AppService } from '../../app.service';
 import { Station } from '../../interfaces/station';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-weather-dashboard',
@@ -26,9 +27,9 @@ export class WeatherDashboardComponent implements OnInit {
 
   constructor(private service: AppService) {}
 
-  ngOnInit() {
-    this.service.getStations().subscribe((data) => {
-      this.stations = data.stations;
+  async ngOnInit() {
+    const response = await firstValueFrom(this.service.getStations());
+    this.stations = response.stations;
       this.initializeMap();
       this.map.on('pointermove', (evt) => {
         this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
@@ -50,7 +51,6 @@ export class WeatherDashboardComponent implements OnInit {
           }
         }
       });
-    });
   }
 
   initializeMap() {
