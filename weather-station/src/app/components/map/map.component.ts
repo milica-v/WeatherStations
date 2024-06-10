@@ -13,13 +13,13 @@ import { Station } from '../../interfaces/station';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-weather-dashboard',
+  selector: 'app-map',
   standalone: true,
   imports: [],
-  templateUrl: './weather-dashboard.component.html',
-  styleUrl: './weather-dashboard.component.css',
+  templateUrl: './map.component.html',
+  styleUrl: './map.component.css',
 })
-export class WeatherDashboardComponent implements OnInit {
+export class MapComponent implements OnInit {
   map: Map;
   iconStyle: Style;
   stations: Station[] = [];
