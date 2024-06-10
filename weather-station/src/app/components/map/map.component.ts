@@ -31,7 +31,6 @@ export class MapComponent implements OnInit {
   vectorLayer: any;
   rasterLayer: any;
 
-  weatherData: any;
   time: any;
   airPressure: any;
   airTemperature: any;
@@ -57,6 +56,9 @@ export class MapComponent implements OnInit {
 
     this.map.on('click', (evt) => {
       this.dataLoaded.emit(null);
+      this.vectorSource.getFeatures().forEach((feature) => {
+        feature.setStyle(this.createOldStyle);
+      });
       if (this.map.hasFeatureAtPixel(evt.pixel)) {
         const features = this.map.getFeaturesAtPixel(
           evt.pixel
@@ -66,9 +68,6 @@ export class MapComponent implements OnInit {
         const station = this.stations.find((s) => s.name == name);
         if (station != null) {
           // window.open(station.link, '_blank');
-          this.vectorSource.getFeatures().forEach((feature) => {
-            feature.setStyle(this.createOldStyle);
-        });
           feature.setStyle(this.createNewStyle());
           this.service
             .getWeather(
@@ -76,7 +75,6 @@ export class MapComponent implements OnInit {
               station.coordinates.longitude
             )
             .subscribe((response) => {
-              this.weatherData = response;
               this.time = response.properties.timeseries.map((dataSet) =>
                 this.datepipe.transform(dataSet.time, 'yyyy-MM-dd HH:mm')
               );
@@ -102,8 +100,8 @@ export class MapComponent implements OnInit {
               this.dataLoaded.emit([
                 station.name,
                 this.time,
-                this.airPressure,
                 this.airTemperature,
+                this.airPressure,
                 this.amountOfPrecipitation,
                 this.airHumidity,
                 this.windSpeed,

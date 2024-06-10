@@ -37,28 +37,28 @@ export class WeatherStationGraphComponent implements OnInit {
       },
       series: [
         {
-          name: 'Air Pressure (hPa)',
-          data: this.chartData[3],
-        },
-        {
           name: 'Air Temperature (°C)',
           data: this.chartData[2],
         },
         {
-          name: 'Percipitation Amount (mm)',
+          name: 'Air Pressure (hPa)',
           data: this.chartData[3],
         },
         {
-          name: 'Air Humidity (%)',
+          name: 'Percipitation Amount (mm)',
           data: this.chartData[4],
         },
         {
-          name: 'Wind Speed (m/s)',
+          name: 'Air Humidity (%)',
           data: this.chartData[5],
         },
         {
-          name: 'Wind Direction (°)',
+          name: 'Wind Speed (m/s)',
           data: this.chartData[6],
+        },
+        {
+          name: 'Wind Direction (°)',
+          data: this.chartData[7],
         },
       ],
       accessibility: {
