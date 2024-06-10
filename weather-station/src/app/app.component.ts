@@ -23,7 +23,6 @@ export class AppComponent {
 
   onDataLoaded(data: any[]) {
     if (data != null) {
-      console.log('On data loaded');
       this.chartData = data;
       this.isDataLoaded = true;
     } else {

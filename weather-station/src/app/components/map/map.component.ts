@@ -27,6 +27,9 @@ export class MapComponent implements OnInit {
   iconStyle: Style;
   stations: Station[] = [];
   points: Feature[] = [];
+  vectorSource: VectorSource;
+  vectorLayer: any;
+  rasterLayer: any;
 
   weatherData: any;
   time: any;
@@ -36,6 +39,7 @@ export class MapComponent implements OnInit {
   airHumidity: any;
   windSpeed: any;
   windDirection: any;
+  selectStyle: any = {};
 
   constructor(private service: AppService, public datepipe: DatePipe) {}
 
@@ -54,13 +58,18 @@ export class MapComponent implements OnInit {
     this.map.on('click', (evt) => {
       this.dataLoaded.emit(null);
       if (this.map.hasFeatureAtPixel(evt.pixel)) {
-        const name = this.map
-          .getFeaturesAtPixel(evt.pixel)[0]
-          .getProperties().name;
+        const features = this.map.getFeaturesAtPixel(
+          evt.pixel
+        ) as Feature<Point>[];
+        const feature = features[0];
+        const name = feature.getProperties().name;
         const station = this.stations.find((s) => s.name == name);
-        console.log(station);
         if (station != null) {
           // window.open(station.link, '_blank');
+          this.vectorSource.getFeatures().forEach((feature) => {
+            feature.setStyle(this.createOldStyle);
+        });
+          feature.setStyle(this.createNewStyle());
           this.service
             .getWeather(
               station.coordinates.latitude,
@@ -121,32 +130,26 @@ export class MapComponent implements OnInit {
       );
     }
 
-    this.iconStyle = new Style({
-      image: new Icon({
-        crossOrigin: 'anonymous',
-        src: 'assets/icon.png',
-        scale: 0.2,
-      }),
-    });
+    this.iconStyle = this.createOldStyle();
 
     for (var point of this.points) {
       point.setStyle(this.iconStyle);
     }
 
-    const vectorSource = new VectorSource({
+    this.vectorSource = new VectorSource({
       features: this.points,
     });
 
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
+    this.vectorLayer = new VectorLayer({
+      source: this.vectorSource,
     });
 
-    const rasterLayer = new TileLayer({
+    this.rasterLayer = new TileLayer({
       source: new OSM(),
     });
 
     this.map = new Map({
-      layers: [rasterLayer, vectorLayer],
+      layers: [this.rasterLayer, this.vectorLayer],
       target: document.getElementById('map'),
       view: new View({
         center: fromLonLat([15.9722, 45.81501]),
@@ -156,6 +159,25 @@ export class MapComponent implements OnInit {
           'EPSG:4326',
           'EPSG:3857'
         ),
+      }),
+    });
+  }
+
+  createNewStyle() {
+    return new Style({
+      image: new Icon({
+        crossOrigin: 'anonymous',
+        src: 'assets/pin.png',
+        scale: 0.1,
+      }),
+    });
+  }
+  createOldStyle() {
+    return new Style({
+      image: new Icon({
+        crossOrigin: 'anonymous',
+        src: 'assets/icon.png',
+        scale: 0.2,
       }),
     });
   }
