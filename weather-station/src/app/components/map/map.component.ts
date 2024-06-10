@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import OSM from 'ol/source/OSM.js';
 import Feature from 'ol/Feature.js';
 import Map from 'ol/Map.js';
@@ -11,51 +11,99 @@ import { fromLonLat, transformExtent } from 'ol/proj.js';
 import { AppService } from '../../app.service';
 import { Station } from '../../interfaces/station';
 import { firstValueFrom } from 'rxjs';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-map',
   standalone: true,
   imports: [],
+  providers: [DatePipe],
   templateUrl: './map.component.html',
   styleUrl: './map.component.css',
 })
 export class MapComponent implements OnInit {
+  @Output() dataLoaded: EventEmitter<any[]> = new EventEmitter();
   map: Map;
   iconStyle: Style;
   stations: Station[] = [];
   points: Feature[] = [];
-  weatherData: any;
 
-  constructor(private service: AppService) {}
+  weatherData: any;
+  time: any;
+  airPressure: any;
+  airTemperature: any;
+  amountOfPrecipitation: any;
+  airHumidity: any;
+  windSpeed: any;
+  windDirection: any;
+
+  constructor(private service: AppService, public datepipe: DatePipe) {}
 
   async ngOnInit() {
     const response = await firstValueFrom(this.service.getStations());
     this.stations = response.stations;
-      this.initializeMap();
-      this.map.on('pointermove', (evt) => {
-        this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
-          evt.pixel
-        )
-          ? 'pointer'
-          : '';
-      });
+    this.initializeMap();
+    this.map.on('pointermove', (evt) => {
+      this.map.getTargetElement().style.cursor = this.map.hasFeatureAtPixel(
+        evt.pixel
+      )
+        ? 'pointer'
+        : '';
+    });
 
-      this.map.on('click', (evt) => {
-        if (this.map.hasFeatureAtPixel(evt.pixel)) {
-          const name = this.map
-            .getFeaturesAtPixel(evt.pixel)[0]
-            .getProperties().name;
-          const station = this.stations.find((s) => s.name == name);
-          console.log(station);
-          if (station != null) {
-            // window.open(station.link, '_blank');
-            this.service.getWeather(station.coordinates.latitude, station.coordinates.longitude).subscribe((data) => {
-              this.weatherData = data;
-              console.log(data);
+    this.map.on('click', (evt) => {
+      this.dataLoaded.emit(null);
+      if (this.map.hasFeatureAtPixel(evt.pixel)) {
+        const name = this.map
+          .getFeaturesAtPixel(evt.pixel)[0]
+          .getProperties().name;
+        const station = this.stations.find((s) => s.name == name);
+        console.log(station);
+        if (station != null) {
+          // window.open(station.link, '_blank');
+          this.service
+            .getWeather(
+              station.coordinates.latitude,
+              station.coordinates.longitude
+            )
+            .subscribe((response) => {
+              this.weatherData = response;
+              this.time = response.properties.timeseries.map((dataSet) =>
+                this.datepipe.transform(dataSet.time, 'yyyy-MM-dd HH:mm')
+              );
+              this.airPressure = response.properties.timeseries.map(
+                (dataSet) =>
+                  dataSet.data.instant.details.air_pressure_at_sea_level
+              );
+              this.airTemperature = response.properties.timeseries.map(
+                (dataSet) => dataSet.data.instant.details.air_temperature
+              );
+              this.amountOfPrecipitation = response.properties.timeseries.map(
+                (dataSet) => dataSet.data.instant.details.precipitation_amount
+              );
+              this.airHumidity = response.properties.timeseries.map(
+                (dataSet) => dataSet.data.instant.details.relative_humidity
+              );
+              this.windSpeed = response.properties.timeseries.map(
+                (dataSet) => dataSet.data.instant.details.wind_speed
+              );
+              this.windDirection = response.properties.timeseries.map(
+                (dataSet) => dataSet.data.instant.details.wind_from_direction
+              );
+              this.dataLoaded.emit([
+                station.name,
+                this.time,
+                this.airPressure,
+                this.airTemperature,
+                this.amountOfPrecipitation,
+                this.airHumidity,
+                this.windSpeed,
+                this.windDirection,
+              ]);
             });
-          }
         }
-      });
+      }
+    });
   }
 
   initializeMap() {

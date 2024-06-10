@@ -1,3 +1,5 @@
 <app-header></app-header>
-<app-map></app-map>
-<app-weather-station-graph></app-weather-station-graph>
+<app-map (dataLoaded)="onDataLoaded($event)"></app-map>
+@if(isDataLoaded) {
+<app-weather-station-graph [chartData]="chartData"></app-weather-station-graph>
+}
